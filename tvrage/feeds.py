@@ -25,8 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from util import _fetch
-from urllib2 import quote
+from .util import _fetch
+from urllib.parse import quote
 
 try:
     import xml.etree.cElementTree as et
@@ -34,7 +34,7 @@ except ImportError:
     import xml.etree.ElementTree as et
 
 
-BASE_URL = 'http://www.tvrage.com/feeds/%s.php?%s=%s'
+BASE_URL = 'http://services.tvrage.com/feeds/%s.php?%s=%s'
 
 
 def _fetch_xml(url, node=None):

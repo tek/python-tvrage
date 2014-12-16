@@ -25,15 +25,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import feeds
+from . import feeds
 
 from datetime import date
 from time import mktime, strptime
 
-from exceptions import (ShowHasEnded, FinaleMayNotBeAnnouncedYet,
+from .exceptions import (ShowHasEnded, FinaleMayNotBeAnnouncedYet,
                         ShowNotFound, NoNewEpisodesAnnounced)
 
-from util import _fetch, parse_synopsis
+from .util import _fetch, parse_synopsis
 
 
 class Episode(object):
@@ -55,7 +55,7 @@ class Episode(object):
         self.id = link.split('/')[-1]
 
     def __unicode__(self):
-        return u'%s %sx%02d %s' % (self.show,
+        return '%s %sx%02d %s' % (self.show,
                                    self.season, self.number, self.title)
 
     __str__ = __repr__ = __unicode__
@@ -68,8 +68,8 @@ class Episode(object):
             if not 'Click here to add a summary' in page:
                 summary = parse_synopsis(page, cleanup='var addthis_config')
                 return summary
-        except Exception, e:
-            print('Episode.summary: %s, %s' % (self, e))
+        except Exception as e:
+            print(('Episode.summary: %s, %s' % (self, e)))
         return 'No summary available'
 
     @property
@@ -83,8 +83,8 @@ class Episode(object):
                                        cleanup='Share this article with your'
                                        ' friends')
                 return recap
-        except Exception, e:
-            print('Episode.recap:urlopen: %s, %s' % (self, e))
+        except Exception as e:
+            print(('Episode.recap:urlopen: %s, %s' % (self, e)))
         return 'No recap available'
 
 
@@ -106,7 +106,7 @@ class Season(dict):
     def finale(self):
         """returns the season finale episode"""
         if not self.is_current:
-            return self[len(self.keys())]
+            return self[len(list(self.keys()))]
         else:
             raise FinaleMayNotBeAnnouncedYet('this is the current season...')
 
@@ -115,11 +115,11 @@ class Show(object):
     """represents a TV show description from tvrage.com
 
     this class is kind of a wrapper around the following of tvrage's xml feeds:
-    * http://www.tvrage.com/feeds/search.php?show=SHOWNAME
-    * http://www.tvrage.com/feeds/episode_list.php?sid=SHOWID
+    * http://services.tvrage.com/feeds/search.php?show=SHOWNAME
+    * http://services.tvrage.com/feeds/episode_list.php?sid=SHOWID
     """
 
-    def __init__(self, name):
+    def __init__(self, name, sid=None):
         self.shortname = name
         self.episodes = {}
 
@@ -135,7 +135,10 @@ class Show(object):
         self.ended = 0
         self.seasons = 0
 
-        show = feeds.search(self.shortname, node='show')
+        if sid is None:
+            show = feeds.search(self.shortname, node='show')
+        else:
+            show = feeds.showinfo(sid)
         if not show:
             raise ShowNotFound(name)
         # dynamically mapping the xml tags to properties:
@@ -158,7 +161,6 @@ class Show(object):
                 snum = int(season.attrib['no'])
             except KeyError:
                 pass  # TODO: adding handeling for specials and movies
-                # bsp: http://www.tvrage.com/feeds/episode_list.php?sid=3519
             else:
                 self.episodes[snum] = Season()
                 for episode in season:
@@ -175,6 +177,9 @@ class Show(object):
                 if snum > 0:
                     self.seasons = max(snum, self.seasons)
         self.episodes[self.seasons].is_current = True
+
+    def __str__(self):
+        return 'Show "{}", {} seasons'.format(self.name, self.seasons)
 
     @property
     def pilot(self):
@@ -193,7 +198,7 @@ class Show(object):
     def next_episode(self):
         """returns the next upcoming episode"""
         try:
-            return self.upcoming_episodes.next()
+            return next(self.upcoming_episodes)
         except StopIteration:
             raise NoNewEpisodesAnnounced(self.name)
 
@@ -201,7 +206,7 @@ class Show(object):
     def upcoming_episodes(self):
         """returns all upcoming episodes that have been annouced yet"""
         today = date.today()
-        for e in self.current_season.values():
+        for e in list(self.current_season.values()):
             if (e.airdate is not None) and (e.airdate >= today):
                 yield e
 
@@ -209,7 +214,7 @@ class Show(object):
     def latest_episode(self):
         """returns the latest episode that has aired already"""
         today = date.today()
-        eps = self.season(self.seasons).values()
+        eps = list(self.season(self.seasons).values())
         eps.reverse()
         for e in eps:
             if (e.airdate is not None) and (e.airdate < today):
@@ -224,8 +229,8 @@ class Show(object):
             page = _fetch(self.link).read()
             synopsis = parse_synopsis(page)
             return synopsis
-        except Exception, e:
-            print('Show.synopsis:urlopen: %s, %s' % (self, e))
+        except Exception as e:
+            print(('Show.synopsis:urlopen: %s, %s' % (self, e)))
         return 'No Synopsis available'
 
     def season(self, n):

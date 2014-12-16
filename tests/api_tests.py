@@ -51,7 +51,7 @@ class ShowTest(unittest.TestCase):
     def test_get_next_episode_from_dead_show(self):
         try:
             self.dead_show.next_episode
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, ShowHasEnded)
 
     # this test may break during off seasons...
@@ -69,7 +69,7 @@ class ShowTest(unittest.TestCase):
     def test_get_current_season_from_dead_show(self):
         try:
             self.dead_show.current_season
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, ShowHasEnded)
 
     # this test may break when new season listings are posted
@@ -91,20 +91,20 @@ class ShowTest(unittest.TestCase):
     def test_non_existant_show_raises_proper_exception(self):
         try:
             Show('yaddayadda')
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, ShowNotFound)
             assert e.value == 'yaddayadda'
 
     def test_synopsis(self):
         assert self.dead_show.synopsis.startswith(
-            u"As an infectious disease specialist,Dr. Gregory House"
+            "As an infectious disease specialist,Dr. Gregory House"
             "(Hugh Laurie) is a brilliant diagnostician who loves the "
             "challenges of the medical puzzles he must solve in order to save"
             " lives.")
 
     def test_show_with_missing_seasons_doesnt_mess_up_season_count(self):
         # Seasons 39 - 47 are missing
-        s = Show(u'House Hunters')
+        s = Show('House Hunters')
         assert s.seasons >= 48
 
 
@@ -128,7 +128,7 @@ class SeasonTest(unittest.TestCase):
         # announced
         try:
             Show('Doctor Who 2005').current_season.finale
-        except Exception, e:
+        except Exception as e:
             assert isinstance(e, FinaleMayNotBeAnnouncedYet)
 
 
@@ -146,14 +146,14 @@ class EpisodeTest(unittest.TestCase):
         assert self.ep.number == 6
 
     def test_airdate(self):
-        assert self.ep.airdate == date(2006, 11, 07)
+        assert self.ep.airdate == date(2006, 11, 0o7)
 
     def test_title(self):
         assert self.ep.title == 'Que Sera Sera'
 
     def test_link(self):
         assert self.ep.link == \
-            'http://www.tvrage.com/House/episodes/461013'
+            'http://services.tvrage.com/House/episodes/461013'
 
     def test_summary_old(self):
         s = "An immensely overweight man is brought in after he's found at"\
@@ -174,7 +174,7 @@ class EpisodeTest(unittest.TestCase):
 
     def test_recap_url(self):
         ep = Show('house m.d.').season(1).episode(1)
-        s = 'http://www.tvrage.com/House/episodes/84699/recap'
+        s = 'http://services.tvrage.com/House/episodes/84699/recap'
         assert ep.recap_url == s
 
     def test_id(self):
