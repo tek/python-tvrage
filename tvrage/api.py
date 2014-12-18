@@ -147,7 +147,8 @@ class Show(object):
             if not elem.tag == 'seasons':  # we'll set this later
                 # these properties should be ints
                 if elem.tag in ('started', 'ended'):
-                    self.__dict__[elem.tag] = int(elem.text)
+                    if isinstance(elem.text, str) and elem.text.isnumeric():
+                        setattr(self, elem.tag, elem.text)
                 # these are fine as strings
                 else:
                     self.__dict__[elem.tag] = elem.text
