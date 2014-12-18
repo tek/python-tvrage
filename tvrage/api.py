@@ -138,6 +138,7 @@ class Show(object):
         if sid is None:
             show = feeds.search(self.shortname, node='show')
         else:
+            self.showid = sid
             show = feeds.showinfo(sid)
         if not show:
             raise ShowNotFound(name)
@@ -150,7 +151,8 @@ class Show(object):
                 # these are fine as strings
                 else:
                     self.__dict__[elem.tag] = elem.text
-        self.genres = [g.text for g in show.find('genres')]
+        genres = show.find('genres')
+        self.genres = [g.text for g in genres] if genres else []
 
         # and now grabbing the episodes
         eplist = feeds.episode_list(self.showid, node='Episodelist')
