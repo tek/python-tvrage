@@ -150,6 +150,8 @@ class Show(object):
                     if isinstance(elem.text, str) and elem.text.isnumeric():
                         setattr(self, elem.tag, elem.text)
                 # these are fine as strings
+                elif elem.tag == 'showname':
+                    self.name = elem.text
                 else:
                     self.__dict__[elem.tag] = elem.text
         genres = show.find('genres')
