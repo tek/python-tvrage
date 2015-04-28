@@ -38,16 +38,26 @@ class BaseError(Exception):
 
 
 class ShowHasEnded(BaseError):
-    pass
+
+    def __init__(self, show):
+        super(ShowHasEnded, self).__init__("Show has ended: {}".format(show))
 
 
 class NoNewEpisodesAnnounced(BaseError):
-    pass
+
+    def __init__(self, show):
+        super(NoNewEpisodesAnnounced, self).__init__(
+            "No new episodes announced: {}".format(show))
 
 
 class FinaleMayNotBeAnnouncedYet(BaseError):
-    pass
+
+    def __init__(self, show):
+        super(FinaleMayNotBeAnnouncedYet, self).__init__(
+            "Finale may not be announced yet: {}".format(show))
 
 
 class ShowNotFound(BaseError):
-    pass
+
+    def __init__(self, show):
+        super(ShowNotFound, self).__init__("Show not found: {}".format(show))
