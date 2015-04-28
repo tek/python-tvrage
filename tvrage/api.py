@@ -148,7 +148,7 @@ class Show(object):
                 # these properties should be ints
                 if elem.tag in ('started', 'ended'):
                     if isinstance(elem.text, str) and elem.text.isnumeric():
-                        setattr(self, elem.tag, elem.text)
+                        setattr(self, elem.tag, int(elem.text))
                 # these are fine as strings
                 elif elem.tag == 'showname':
                     self.name = elem.text
